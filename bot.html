@@ -21,6 +21,19 @@
             font-size: 1.2em;
             margin: 10px;
             cursor: pointer;
+            border: none;
+            border-radius: 10px;
+        }
+        .tap-button {
+            width: 100px;
+            height: 100px;
+            background-color: #f0ad4e;
+            color: #ffffff;
+            font-size: 1.5em;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .button-disabled {
             background-color: #ccc;
@@ -46,7 +59,7 @@
         <p>Coins: <span id="coins">0</span></p>
         <p>Energy: <span id="energy">0</span>/<span id="max-energy">50</span></p>
     </div>
-    <button id="tapButton" onclick="tap()">Tap</button>
+    <button id="tapButton" class="tap-button" onclick="tap()">Tap</button>
     <div class="boosters">
         <div class="booster-item">
             <button onclick="buyBooster('multitap')">Upgrade Multitap (500 coins)</button>
@@ -72,7 +85,7 @@
         const maxEnergyDisplay = document.getElementById('max-energy');
         const multitapLevelDisplay = document.getElementById('multitapLevel');
         const energyLimitLevelDisplay = document.getElementById('energyLimitLevel');
-        
+
         function updateUI() {
             coinsDisplay.textContent = coins;
             energyDisplay.textContent = energy;
@@ -84,6 +97,7 @@
             if (energy > 0) {
                 coins += multitapLevel;
                 energy--;
+                updateState();
                 updateUI();
             }
         }
@@ -110,17 +124,36 @@
                     }
                     break;
             }
+            updateState();
             updateUI();
+        }
+
+        function updateState() {
+            localStorage.setItem('coins', coins);
+            localStorage.setItem('energy', energy);
+            localStorage.setItem('maxEnergy', maxEnergy);
+            localStorage.setItem('multitapLevel', multitapLevel);
+        }
+
+        function loadState() {
+            coins = parseInt(localStorage.getItem('coins')) || 0;
+            energy = parseInt(localStorage.getItem('energy')) || maxEnergy;
+            maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 50;
+            multitapLevel = parseInt(localStorage.getItem('multitapLevel')) || 1;
         }
 
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy++;
+                updateState();
                 updateUI();
             }
         }, 1000);
 
-        updateUI();
+        window.onload = function() {
+            loadState();
+            updateUI();
+        }
     </script>
 
 </body>
