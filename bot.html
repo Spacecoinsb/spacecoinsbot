@@ -17,11 +17,11 @@
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 20px;
+            padding: 40px 80px; /* Увеличенный размер кнопки */
+            font-size: 30px; /* Увеличенный размер шрифта */
             cursor: pointer;
             margin-top: 20px;
-            border-radius: 5px;
+            border-radius: 10px; /* Скругленные углы */
             transition: background-color 0.3s;
         }
 
@@ -33,8 +33,8 @@
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 15px 30px; /* Увеличенный размер кнопки прокачки */
+            font-size: 20px;
             cursor: pointer;
             margin-top: 20px;
             border-radius: 5px;
@@ -58,17 +58,47 @@
             font-size: 18px;
             margin-top: 10px;
         }
+
+        .upgrades {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upgrade-item {
+            margin: 10px;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div id="usercard">
-        <h1>Нищий <span id="username"></span>!</h1>
+        <h1>нищийme, <span id="username"></span>!</h1>
     </div>
     <div id="score">Score: <span id="score-value">0</span></div>
     <div id="click-count">Clicks: <span id="click-count-value">0</span></div>
     <button class="button" onclick="clickButton()">Click Me</button>
-    <button class="upgrade-button" onclick="upgrade()">Upgrade (+1 per click, 10 points)</button>
+    <div class="upgrades">
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(1)">Upgrade 1 (+1 per click, 10 points)</button>
+        </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(2)">Upgrade 2 (+2 per click, 20 points)</button>
+        </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(5)">Upgrade 3 (+5 per click, 50 points)</button>
+        </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(10)">Upgrade 4 (+10 per click, 100 points)</button>
+        </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(20)">Upgrade 5 (+20 per click, 200 points)</button>
+        </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(50)">Upgrade 6 (+50 per click, 500 points)</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -96,11 +126,12 @@
             updateScore();
         }
 
-        function upgrade() {
+        function upgrade(points) {
             console.log('Upgrade attempted. Current score:', score);
-            if (score >= 10) {
-                score -= 10;
-                pointsPerClick += 1;
+            const upgradeCost = points * 10;
+            if (score >= upgradeCost) {
+                score -= upgradeCost;
+                pointsPerClick += points;
                 updateScore();
                 console.log('Upgrade successful. New points per click:', pointsPerClick);
             } else {
