@@ -8,13 +8,18 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f0f0f0;
+            background-image: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff);
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .button {
-            background-color: #007bff;
+            background-color: #f39c12;
             color: white;
             border: none;
             padding: 40px 80px; /* Увеличенный размер кнопки */
@@ -23,14 +28,17 @@
             margin-top: 20px;
             border-radius: 10px; /* Скругленные углы */
             transition: background-color 0.3s;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f39c12;
+            overflow: hidden;
         }
 
         .button:hover {
-            background-color: #0056b3;
+            background-color: #f1c40f;
         }
 
         .upgrade-button {
-            background-color: #28a745;
+            background-color: #27ae60;
             color: white;
             border: none;
             padding: 15px 30px; /* Увеличенный размер кнопки прокачки */
@@ -39,10 +47,13 @@
             margin-top: 20px;
             border-radius: 5px;
             transition: background-color 0.3s;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #27ae60;
+            overflow: hidden;
         }
 
         .upgrade-button:hover {
-            background-color: #218838;
+            background-color: #219653;
         }
 
         #usercard {
@@ -74,10 +85,10 @@
 </head>
 <body>
     <div id="usercard">
-        <h1>нищийme, <span id="username"></span>!</h1>
+        <h1 style="color: white; font-size: 36px;">Welcome, <span id="username"></span>!</h1>
     </div>
-    <div id="score">Score: <span id="score-value">0</span></div>
-    <div id="click-count">Clicks: <span id="click-count-value">0</span></div>
+    <div id="score" style="color: white;">Score: <span id="score-value">0</span></div>
+    <div id="click-count" style="color: white;">Clicks: <span id="click-count-value">0</span></div>
     <button class="button" onclick="clickButton()">Click Me</button>
     <div class="upgrades">
         <div class="upgrade-item">
@@ -98,6 +109,9 @@
         <div class="upgrade-item">
             <button class="upgrade-button" onclick="upgrade(50)">Upgrade 6 (+50 per click, 500 points)</button>
         </div>
+        <div class="upgrade-item">
+            <button class="upgrade-button" onclick="upgrade(100)">Upgrade 7 (+100 per click, 1000 points)</button>
+        </div>
     </div>
 
     <script>
@@ -113,30 +127,25 @@
         let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
 
         function updateScore() {
-            console.log('Updating score display:', score, clickCount);
             document.getElementById('score-value').innerText = score;
             document.getElementById('click-count-value').innerText = clickCount;
             saveState();
         }
 
         function clickButton() {
-            console.log('Button clicked. Current score:', score, 'Current points per click:', pointsPerClick);
             score += pointsPerClick;
             clickCount++;
             updateScore();
         }
 
         function upgrade(points) {
-            console.log('Upgrade attempted. Current score:', score);
-            const upgradeCost = points * 10000000000000;
+            const upgradeCost = points * 10;
             if (score >= upgradeCost) {
                 score -= upgradeCost;
                 pointsPerClick += points;
                 updateScore();
-                console.log('Upgrade successful. New points per click:', pointsPerClick);
             } else {
                 alert('Not enough points to upgrade!');
-                console.log('Upgrade failed. Not enough points.');
             }
         }
 
@@ -147,7 +156,6 @@
         }
 
         tg.onEvent('mainButtonClicked', function() {
-            console.log('Main button clicked. Sending data...');
             const data = { score: score, pointsPerClick: pointsPerClick, clickCount: clickCount };
             tg.sendData(JSON.stringify(data));
         });
