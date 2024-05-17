@@ -63,11 +63,19 @@
         #score {
             font-size: 24px;
             margin-top: 20px;
+            color: white;
         }
 
         #click-count {
             font-size: 18px;
             margin-top: 10px;
+            color: white;
+        }
+
+        #limit {
+            font-size: 18px;
+            margin-top: 10px;
+            color: white;
         }
 
         .upgrades {
@@ -87,30 +95,16 @@
     <div id="usercard">
         <h1 style="color: white; font-size: 36px;">Welcome, <span id="username"></span>!</h1>
     </div>
-    <div id="score" style="color: white;">Score: <span id="score-value">0</span></div>
-    <div id="click-count" style="color: white;">Clicks: <span id="click-count-value">0</span></div>
+    <div id="score">Score: <span id="score-value">0</span></div>
+    <div id="click-count">Clicks: <span id="click-count-value">0</span></div>
+    <div id="limit">Click Limit: <span id="limit-value">10</span></div>
     <button class="button" onclick="clickButton()">Click Me</button>
     <div class="upgrades">
         <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(1)">Upgrade 1 (+1 per click, 10 points)</button>
+            <button class="upgrade-button" onclick="upgrade(1)">Upgrade (+1 per click, 10 points)</button>
         </div>
         <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(2)">Upgrade 2 (+2 per click, 20 points)</button>
-        </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(5)">Upgrade 3 (+5 per click, 50 points)</button>
-        </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(10)">Upgrade 4 (+10 per click, 100 points)</button>
-        </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(20)">Upgrade 5 (+20 per click, 200 points)</button>
-        </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(50)">Upgrade 6 (+50 per click, 500 points)</button>
-        </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(100)">Upgrade 7 (+100 per click, 1000 points)</button>
+            <button class="upgrade-button" onclick="increaseLimit()">Increase Limit (50 points)</button>
         </div>
     </div>
 
@@ -125,17 +119,23 @@
         let score = parseInt(localStorage.getItem('score')) || 0;
         let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
         let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
+        let clickLimit = parseInt(localStorage.getItem('clickLimit')) || 10;
 
         function updateScore() {
             document.getElementById('score-value').innerText = score;
             document.getElementById('click-count-value').innerText = clickCount;
+            document.getElementById('limit-value').innerText = clickLimit;
             saveState();
         }
 
         function clickButton() {
-            score += pointsPerClick;
-            clickCount++;
-            updateScore();
+            if (clickCount < clickLimit) {
+                score += pointsPerClick;
+                clickCount++;
+                updateScore();
+            } else {
+                alert('You have reached your click limit!');
+            }
         }
 
         function upgrade(points) {
@@ -149,14 +149,25 @@
             }
         }
 
+        function increaseLimit() {
+            if (score >= 50) {
+                score -= 50;
+                clickLimit *= 2;
+                updateScore();
+            } else {
+                alert('Not enough points to increase the limit!');
+            }
+        }
+
         function saveState() {
             localStorage.setItem('score', score);
             localStorage.setItem('pointsPerClick', pointsPerClick);
             localStorage.setItem('clickCount', clickCount);
+            localStorage.setItem('clickLimit', clickLimit);
         }
 
         tg.onEvent('mainButtonClicked', function() {
-            const data = { score: score, pointsPerClick: pointsPerClick, clickCount: clickCount };
+            const data = { score: score, pointsPerClick: pointsPerClick, clickCount: clickCount, clickLimit: clickLimit };
             tg.sendData(JSON.stringify(data));
         });
 
