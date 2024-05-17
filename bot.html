@@ -3,176 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App Clicker</title>
+    <title>Tap Clicker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            background-image: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-        }
-
-        .button {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 40px 80px; /* Увеличенный размер кнопки */
-            font-size: 30px; /* Увеличенный размер шрифта */
-            cursor: pointer;
-            margin-top: 20px;
-            border-radius: 10px; /* Скругленные углы */
-            transition: background-color 0.3s;
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-            border: 2px solid #f39c12;
-            overflow: hidden;
-        }
-
-        .button:hover {
-            background-color: #f1c40f;
-        }
-
-        .upgrade-button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 15px 30px; /* Увеличенный размер кнопки прокачки */
-            font-size: 20px;
-            cursor: pointer;
-            margin-top: 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-            border: 2px solid #27ae60;
-            overflow: hidden;
-        }
-
-        .upgrade-button:hover {
-            background-color: #219653;
-        }
-
-        #usercard {
-            margin-bottom: 20px;
-        }
-
-        #score {
-            font-size: 24px;
-            margin-top: 20px;
-            color: white;
-        }
-
-        #click-count {
-            font-size: 18px;
-            margin-top: 10px;
-            color: white;
-        }
-
-        #limit {
-            font-size: 18px;
-            margin-top: 10px;
-            color: white;
-        }
-
-        .upgrades {
-            margin-top: 30px;
-            display: flex;
-            flex-wrap: wrap;
             justify-content: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: #ffffff;
+            margin: 0;
         }
-
-        .upgrade-item {
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
             margin: 10px;
+            cursor: pointer;
+        }
+        .button-disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .stats {
+            margin: 20px;
+        }
+        .boosters {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .booster-item {
+            margin: 5px 0;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="usercard">
-        <h1 style="color: white; font-size: 36px;">Welcome, <span id="username"></span>!</h1>
+
+    <h1>Tap Clicker</h1>
+    <div class="stats">
+        <p>Coins: <span id="coins">0</span></p>
+        <p>Energy: <span id="energy">0</span>/<span id="max-energy">50</span></p>
     </div>
-    <div id="score">Score: <span id="score-value">0</span></div>
-    <div id="click-count">Clicks: <span id="click-count-value">0</span></div>
-    <div id="limit">Click Limit: <span id="limit-value">10</span></div>
-    <button class="button" onclick="clickButton()">Click Me</button>
-    <div class="upgrades">
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="upgrade(1)">Upgrade (+1 per click, 10 points)</button>
+    <button id="tapButton" onclick="tap()">Tap</button>
+    <div class="boosters">
+        <div class="booster-item">
+            <button onclick="buyBooster('multitap')">Upgrade Multitap (500 coins)</button>
+            <span id="multitapLevel">Level: 1</span>
         </div>
-        <div class="upgrade-item">
-            <button class="upgrade-button" onclick="increaseLimit()">Increase Limit (50 points)</button>
+        <div class="booster-item">
+            <button onclick="buyBooster('energyLimit')">Upgrade Energy Limit (400 coins)</button>
+            <span id="energyLimitLevel">Level: 1</span>
+        </div>
+        <div class="booster-item">
+            <button onclick="buyBooster('tapBot')">Buy Tap Bot (200 coins)</button>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.MainButton.text = "Send Data";
-        tg.MainButton.show();
-
-        document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
-
-        let score = parseInt(localStorage.getItem('score')) || 0;
-        let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
-        let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
-        let clickLimit = parseInt(localStorage.getItem('clickLimit')) || 10;
-
-        function updateScore() {
-            document.getElementById('score-value').innerText = score;
-            document.getElementById('click-count-value').innerText = clickCount;
-            document.getElementById('limit-value').innerText = clickLimit;
-            saveState();
+        let coins = 0;
+        let energy = 50;
+        let maxEnergy = 50;
+        let multitapLevel = 1;
+        const tapButton = document.getElementById('tapButton');
+        const coinsDisplay = document.getElementById('coins');
+        const energyDisplay = document.getElementById('energy');
+        const maxEnergyDisplay = document.getElementById('max-energy');
+        const multitapLevelDisplay = document.getElementById('multitapLevel');
+        const energyLimitLevelDisplay = document.getElementById('energyLimitLevel');
+        
+        function updateUI() {
+            coinsDisplay.textContent = coins;
+            energyDisplay.textContent = energy;
+            maxEnergyDisplay.textContent = maxEnergy;
+            multitapLevelDisplay.textContent = `Level: ${multitapLevel}`;
         }
 
-        function clickButton() {
-            if (clickCount < clickLimit) {
-                score += pointsPerClick;
-                clickCount++;
-                updateScore();
-            } else {
-                alert('You have reached your click limit!');
+        function tap() {
+            if (energy > 0) {
+                coins += multitapLevel;
+                energy--;
+                updateUI();
             }
         }
 
-        function upgrade(points) {
-            const upgradeCost = points * 10;
-            if (score >= upgradeCost) {
-                score -= upgradeCost;
-                pointsPerClick += points;
-                updateScore();
-            } else {
-                alert('Not enough points to upgrade!');
+        function buyBooster(booster) {
+            switch(booster) {
+                case 'multitap':
+                    if (coins >= 500) {
+                        coins -= 500;
+                        multitapLevel++;
+                    }
+                    break;
+                case 'energyLimit':
+                    if (coins >= 400) {
+                        coins -= 400;
+                        maxEnergy += 10;
+                        energy = maxEnergy;
+                    }
+                    break;
+                case 'tapBot':
+                    if (coins >= 200) {
+                        coins -= 200;
+                        setInterval(tap, 1000);
+                    }
+                    break;
             }
+            updateUI();
         }
 
-        function increaseLimit() {
-            if (score >= 50) {
-                score -= 50;
-                clickLimit *= 2;
-                updateScore();
-            } else {
-                alert('Not enough points to increase the limit!');
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy++;
+                updateUI();
             }
-        }
+        }, 1000);
 
-        function saveState() {
-            localStorage.setItem('score', score);
-            localStorage.setItem('pointsPerClick', pointsPerClick);
-            localStorage.setItem('clickCount', clickCount);
-            localStorage.setItem('clickLimit', clickLimit);
-        }
-
-        tg.onEvent('mainButtonClicked', function() {
-            const data = { score: score, pointsPerClick: pointsPerClick, clickCount: clickCount, clickLimit: clickLimit };
-            tg.sendData(JSON.stringify(data));
-        });
-
-        // Ensure the initial score is displayed
-        updateScore();
+        updateUI();
     </script>
+
 </body>
 </html>
