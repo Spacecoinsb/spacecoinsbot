@@ -83,31 +83,33 @@
         let clickCount = 0;
 
         function updateScore() {
-            console.log('Updating score display');
+            console.log('Updating score display:', score, clickCount);
             document.getElementById('score-value').innerText = score;
             document.getElementById('click-count-value').innerText = clickCount;
         }
 
         function clickButton() {
-            console.log('Button clicked');
+            console.log('Button clicked. Current score:', score, 'Current points per click:', pointsPerClick);
             score += pointsPerClick;
             clickCount++;
             updateScore();
         }
 
         function upgrade() {
-            console.log('Upgrade attempted');
+            console.log('Upgrade attempted. Current score:', score);
             if (score >= 10) {
                 score -= 10;
                 pointsPerClick += 1;
                 updateScore();
+                console.log('Upgrade successful. New points per click:', pointsPerClick);
             } else {
                 alert('Not enough points to upgrade!');
+                console.log('Upgrade failed. Not enough points.');
             }
         }
 
         tg.onEvent('mainButtonClicked', function() {
-            console.log('Main button clicked');
+            console.log('Main button clicked. Sending data...');
             const data = { score: score, pointsPerClick: pointsPerClick, clickCount: clickCount };
             tg.sendData(JSON.stringify(data));
         });
