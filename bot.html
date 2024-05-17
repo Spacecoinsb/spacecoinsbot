@@ -63,7 +63,7 @@
 </head>
 <body>
     <div id="usercard">
-        <h1>Привет, <span id="username"></span>!</h1>
+        <h1>Welcome, <span id="username"></span>!</h1>
     </div>
     <div id="score">Score: <span id="score-value">0</span></div>
     <div id="click-count">Clicks: <span id="click-count-value">0</span></div>
@@ -78,14 +78,15 @@
 
         document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
 
-        let score = 0;
-        let pointsPerClick = 1;
-        let clickCount = 0;
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
+        let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
 
         function updateScore() {
             console.log('Updating score display:', score, clickCount);
             document.getElementById('score-value').innerText = score;
             document.getElementById('click-count-value').innerText = clickCount;
+            saveState();
         }
 
         function clickButton() {
@@ -106,6 +107,12 @@
                 alert('Not enough points to upgrade!');
                 console.log('Upgrade failed. Not enough points.');
             }
+        }
+
+        function saveState() {
+            localStorage.setItem('score', score);
+            localStorage.setItem('pointsPerClick', pointsPerClick);
+            localStorage.setItem('clickCount', clickCount);
         }
 
         tg.onEvent('mainButtonClicked', function() {
