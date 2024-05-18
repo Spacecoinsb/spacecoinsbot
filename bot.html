@@ -3,158 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tap Clicker</title>
+    <title>Clicker</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #282c34;
-            color: #ffffff;
-            margin: 0;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            margin: 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 10px;
-        }
-        .tap-button {
-            width: 100px;
-            height: 100px;
-            background-color: #f0ad4e;
-            color: #ffffff;
-            font-size: 1.5em;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .button-disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .stats {
-            margin: 20px;
-        }
-        .boosters {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .booster-item {
-            margin: 5px 0;
-        }
+        body { font-family: Arial, sans-serif; background: #2C003E; color: white; margin: 0; padding: 0; }
+        .container { padding: 20px; }
+        .hidden { display: none; }
+        .button { padding: 10px 20px; margin: 5px; border: none; background: #6C03FA; color: white; cursor: pointer; }
+        .button:disabled { background: #888; }
+        .navbar { display: flex; justify-content: space-around; background: #1F002A; padding: 10px 0; }
+        .navbar button { flex: 1; }
+        .balance { font-size: 24px; margin-bottom: 20px; }
+        .energy { margin: 10px 0; }
     </style>
 </head>
 <body>
-
-    <h1>Tap Cr</h1>
-    <div class="stats">
-        <p>Coins: <span id="coins">0</span></p>
-        <p>Energy: <span id="energy">0</span>/<span id="max-energy">50</span></p>
+    <div class="navbar">
+        <button onclick="showPage('clickPage')">Tap</button>
+        <button onclick="showPage('boostPage')">Boost</button>
     </div>
-    <button id="tapButton" class="tap-button" onclick="tap()">Tap</button>
-    <div class="boosters">
-        <div class="booster-item">
-            <button onclick="buyBooster('multitap')">Upgrade Multitap (500 coins)</button>
-            <span id="multitapLevel">Level: 1</span>
+    <div class="container">
+        <div id="clickPage">
+            <div class="balance">Balance: <span id="balance">0</span> coins</div>
+            <div class="energy">Energy: <span id="energy">0</span>/<span id="maxEnergy">0</span></div>
+            <button id="tapButton" class="button" onclick="tap()">Tap</button>
         </div>
-        <div class="booster-item">
-            <button onclick="buyBooster('energyLimit')">Upgrade Energy Limit (400 coins)</button>
-            <span id="energyLimitLevel">Level: 1</span>
-        </div>
-        <div class="booster-item">
-            <button onclick="buyBooster('tapBot')">Buy Tap Bot (200 coins)</button>
+        <div id="boostPage" class="hidden">
+            <div class="balance">Balance: <span id="balanceBoost">0</span> coins</div>
+            <div>
+                <button class="button" onclick="upgrade('multitap')">Upgrade Multitap (Cost: 500,000 coins)</button>
+                <div>Multitap Level: <span id="multitapLevel">0</span></div>
+            </div>
+            <div>
+                <button class="button" onclick="upgrade('energyLimit')">Upgrade Energy Limit (Cost: 400,000 coins)</button>
+                <div>Energy Limit Level: <span id="energyLimitLevel">0</span></div>
+            </div>
         </div>
     </div>
 
     <script>
-        let coins = 5000;
-        let energy = 50;
-        let maxEnergy = 50;
-        let multitapLevel = 1;
-        const tapButton = document.getElementById('tapButton');
-        const coinsDisplay = document.getElementById('coins');
-        const energyDisplay = document.getElementById('energy');
-        const maxEnergyDisplay = document.getElementById('max-energy');
-        const multitapLevelDisplay = document.getElementById('multitapLevel');
-        const energyLimitLevelDisplay = document.getElementById('energyLimitLevel');
+        let balance = parseInt(localStorage.getItem('balance')) || 0;
+        let energy = parseInt(localStorage.getItem('energy')) || 6500;
+        let maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 6500;
+        let multitapLevel = parseInt(localStorage.getItem('multitapLevel')) || 14;
+        let energyLimitLevel = parseInt(localStorage.getItem('energyLimitLevel')) || 13;
 
-        function updateUI() {
-            coinsDisplay.textContent = coins;
-            energyDisplay.textContent = energy;
-            maxEnergyDisplay.textContent = maxEnergy;
-            multitapLevelDisplay.textContent = `Level: ${multitapLevel}`;
+        document.getElementById('balance').innerText = balance.toLocaleString();
+        document.getElementById('balanceBoost').innerText = balance.toLocaleString();
+        document.getElementById('energy').innerText = energy;
+        document.getElementById('maxEnergy').innerText = maxEnergy;
+        document.getElementById('multitapLevel').innerText = multitapLevel;
+        document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
+
+        function showPage(pageId) {
+            document.getElementById('clickPage').classList.add('hidden');
+            document.getElementById('boostPage').classList.add('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+            if (pageId === 'clickPage') {
+                document.getElementById('balance').innerText = balance.toLocaleString();
+            } else {
+                document.getElementById('balanceBoost').innerText = balance.toLocaleString();
+            }
         }
 
         function tap() {
             if (energy > 0) {
-                coins += multitapLevel;
-                energy--;
-                updateState();
-                updateUI();
+                balance += 1 * (1 + multitapLevel * 0.1);
+                energy -= 1;
+                updateDisplay();
+                saveData();
             }
         }
 
-        function buyBooster(booster) {
-            switch(booster) {
-                case 'multitap':
-                    if (coins >= 500) {
-                        coins -= 500;
-                        multitapLevel++;
-                    }
-                    break;
-                case 'energyLimit':
-                    if (coins >= 400) {
-                        coins -= 400;
-                        maxEnergy += 10;
-                        energy = maxEnergy;
-                    }
-                    break;
-                case 'tapBot':
-                    if (coins >= 200) {
-                        coins -= 200;
-                        setInterval(tap, 1000);
-                    }
-                    break;
+        function upgrade(type) {
+            if (type === 'multitap' && balance >= 500000) {
+                balance -= 500000;
+                multitapLevel += 1;
+                document.getElementById('multitapLevel').innerText = multitapLevel;
+            } else if (type === 'energyLimit' && balance >= 400000) {
+                balance -= 400000;
+                energyLimitLevel += 1;
+                maxEnergy += 500;
+                document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
+                document.getElementById('maxEnergy').innerText = maxEnergy;
             }
-            updateState();
-            updateUI();
+            updateDisplay();
+            saveData();
         }
 
-        function updateState() {
-            localStorage.setItem('coins', coins);
+        function updateDisplay() {
+            document.getElementById('balance').innerText = balance.toLocaleString();
+            document.getElementById('balanceBoost').innerText = balance.toLocaleString();
+            document.getElementById('energy').innerText = energy;
+        }
+
+        function saveData() {
+            localStorage.setItem('balance', balance);
             localStorage.setItem('energy', energy);
             localStorage.setItem('maxEnergy', maxEnergy);
             localStorage.setItem('multitapLevel', multitapLevel);
-        }
-
-        function loadState() {
-            coins = parseInt(localStorage.getItem('coins')) || 0;
-            energy = parseInt(localStorage.getItem('energy')) || maxEnergy;
-            maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 50;
-            multitapLevel = parseInt(localStorage.getItem('multitapLevel')) || 1;
+            localStorage.setItem('energyLimitLevel', energyLimitLevel);
         }
 
         setInterval(() => {
             if (energy < maxEnergy) {
-                energy++;
-                updateState();
-                updateUI();
+                energy += 1;
+                updateDisplay();
+                saveData();
             }
         }, 1000);
-
-        window.onload = function() {
-            loadState();
-            updateUI();
-        }
     </script>
-
 </body>
 </html>
