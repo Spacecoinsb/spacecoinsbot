@@ -5,30 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TapSwap Clicker</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #2C003E; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
-        .container { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(45deg, #6B73FF, #000DFF); color: #FFF; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        .container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .hidden { display: none; }
-        .button { padding: 15px 30px; margin: 10px; border: none; background: #6C03FA; color: white; cursor: pointer; font-size: 16px; border-radius: 5px; }
-        .button:disabled { background: #888; }
-        .navbar { display: flex; justify-content: space-around; background: #1F002A; padding: 10px 0; }
-        .navbar button { flex: 1; font-size: 18px; }
+        .button { padding: 15px 30px; margin: 10px; border: none; background: #FF6B6B; color: #FFF; cursor: pointer; font-size: 16px; border-radius: 5px; transition: background 0.3s; }
+        .button:disabled { background: #888; cursor: not-allowed; }
+        .button:hover:not(:disabled) { background: #FF4C4C; }
+        .navbar { display: flex; justify-content: space-around; background: #000DFF; padding: 10px 0; border-top: 2px solid #6B73FF; }
+        .navbar button { flex: 1; font-size: 18px; color: #FFF; background: none; border: none; cursor: pointer; padding: 10px; transition: background 0.3s; }
+        .navbar button:hover { background: #6B73FF; }
         .balance { font-size: 28px; margin-bottom: 20px; }
         .energy { margin: 10px 0; font-size: 20px; }
+        .energy-bar { width: 100%; height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .energy-fill { height: 100%; background: #00FF00; transition: width 0.5s; }
         .upgrade-container { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
         .upgrade { margin: 10px 0; text-align: center; }
         .upgrade span { display: block; margin-top: 5px; }
         .tap-area { display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; font-size: 36px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <button onclick="showPage('clickPage')">Tap</button>
-        <button onclick="showPage('boostPage')">Boost</button>
-    </div>
+    <div class="header">TapSwap Clicker</div>
     <div class="container">
         <div id="clickPage" class="tap-area">
             <div class="balance">Balance: <span id="balance">0</span> coins</div>
-            <div class="energy">Energy: <span id="energy">0</span>/<span id="maxEnergy">0</span></div>
+            <div class="energy">Energy:</div>
+            <div class="energy-bar">
+                <div class="energy-fill" id="energyFill" style="width: 0%;"></div>
+            </div>
             <button id="tapButton" class="button" onclick="tap()">Tap</button>
         </div>
         <div id="boostPage" class="hidden">
@@ -53,6 +58,10 @@
             </div>
         </div>
     </div>
+    <div class="navbar">
+        <button onclick="showPage('clickPage')">Tap</button>
+        <button onclick="showPage('boostPage')">Boost</button>
+    </div>
 
     <script>
         let balance = parseInt(localStorage.getItem('balance')) || 0;
@@ -65,8 +74,7 @@
 
         document.getElementById('balance').innerText = balance.toLocaleString();
         document.getElementById('balanceBoost').innerText = balance.toLocaleString();
-        document.getElementById('energy').innerText = energy;
-        document.getElementById('maxEnergy').innerText = maxEnergy;
+        document.getElementById('energyFill').style.width = `${(energy / maxEnergy) * 100}%`;
         document.getElementById('multitapLevel').innerText = multitapLevel;
         document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
         document.getElementById('rechargeSpeedLevel').innerText = rechargeSpeedLevel;
@@ -85,7 +93,7 @@
 
         function tap() {
             if (energy > 0) {
-                balance += 10000 * (1 + multitapLevel * 0.2);
+                balance += 1 * (1 + multitapLevel * 0.2);
                 energy -= 1;
                 updateDisplay();
                 saveData();
@@ -102,7 +110,6 @@
                 energyLimitLevel += 1;
                 maxEnergy += 50;
                 document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
-                document.getElementById('maxEnergy').innerText = maxEnergy;
             } else if (type === 'rechargeSpeed' && balance >= 30000) {
                 balance -= 30000;
                 rechargeSpeedLevel += 1;
@@ -124,7 +131,7 @@
         function updateDisplay() {
             document.getElementById('balance').innerText = balance.toLocaleString();
             document.getElementById('balanceBoost').innerText = balance.toLocaleString();
-            document.getElementById('energy').innerText = energy;
+            document.getElementById('energyFill').style.width = `${(energy / maxEnergy) * 100}%`;
         }
 
         function saveData() {
