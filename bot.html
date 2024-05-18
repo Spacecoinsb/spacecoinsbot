@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker</title>
+    <title>TapSwap Clicker</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #2C003E; color: white; margin: 0; padding: 0; }
-        .container { padding: 20px; }
+        body { font-family: Arial, sans-serif; background: #2C003E; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        .container { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .hidden { display: none; }
-        .button { padding: 10px 20px; margin: 5px; border: none; background: #6C03FA; color: white; cursor: pointer; }
+        .button { padding: 15px 30px; margin: 10px; border: none; background: #6C03FA; color: white; cursor: pointer; font-size: 16px; border-radius: 5px; }
         .button:disabled { background: #888; }
         .navbar { display: flex; justify-content: space-around; background: #1F002A; padding: 10px 0; }
-        .navbar button { flex: 1; }
-        .balance { font-size: 24px; margin-bottom: 20px; }
-        .energy { margin: 10px 0; }
+        .navbar button { flex: 1; font-size: 18px; }
+        .balance { font-size: 28px; margin-bottom: 20px; }
+        .energy { margin: 10px 0; font-size: 20px; }
+        .upgrade-container { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+        .upgrade { margin: 10px 0; text-align: center; }
+        .upgrade span { display: block; margin-top: 5px; }
+        .tap-area { display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
@@ -22,30 +26,42 @@
         <button onclick="showPage('boostPage')">Boost</button>
     </div>
     <div class="container">
-        <div id="clickPage">
+        <div id="clickPage" class="tap-area">
             <div class="balance">Balance: <span id="balance">0</span> coins</div>
             <div class="energy">Energy: <span id="energy">0</span>/<span id="maxEnergy">0</span></div>
             <button id="tapButton" class="button" onclick="tap()">Tap</button>
         </div>
         <div id="boostPage" class="hidden">
             <div class="balance">Balance: <span id="balanceBoost">0</span> coins</div>
-            <div>
-                <button class="button" onclick="upgrade('multitap')">Upgrade Multitap (Cost: 500,000 coins)</button>
-                <div>Multitap Level: <span id="multitapLevel">0</span></div>
-            </div>
-            <div>
-                <button class="button" onclick="upgrade('energyLimit')">Upgrade Energy Limit (Cost: 400,000 coins)</button>
-                <div>Energy Limit Level: <span id="energyLimitLevel">0</span></div>
+            <div class="upgrade-container">
+                <div class="upgrade">
+                    <button class="button" onclick="upgrade('multitap')">Upgrade Multitap (Cost: 50,000 coins)</button>
+                    <span>Multitap Level: <span id="multitapLevel">0</span></span>
+                </div>
+                <div class="upgrade">
+                    <button class="button" onclick="upgrade('energyLimit')">Upgrade Energy Limit (Cost: 40,000 coins)</button>
+                    <span>Energy Limit Level: <span id="energyLimitLevel">0</span></span>
+                </div>
+                <div class="upgrade">
+                    <button class="button" onclick="upgrade('rechargeSpeed')">Upgrade Recharge Speed (Cost: 30,000 coins)</button>
+                    <span>Recharge Speed Level: <span id="rechargeSpeedLevel">0</span></span>
+                </div>
+                <div class="upgrade">
+                    <button class="button" onclick="upgrade('tapBot')">Buy Tap Bot (Cost: 200,000 coins)</button>
+                    <span>Tap Bot: <span id="tapBot">Not Purchased</span></span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let balance = parseInt(localStorage.getItem('balance')) || 0;
-        let energy = parseInt(localStorage.getItem('energy')) || 6500;
-        let maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 6500;
-        let multitapLevel = parseInt(localStorage.getItem('multitapLevel')) || 14;
-        let energyLimitLevel = parseInt(localStorage.getItem('energyLimitLevel')) || 13;
+        let energy = parseInt(localStorage.getItem('energy')) || 100;
+        let maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 100;
+        let multitapLevel = parseInt(localStorage.getItem('multitapLevel')) || 0;
+        let energyLimitLevel = parseInt(localStorage.getItem('energyLimitLevel')) || 0;
+        let rechargeSpeedLevel = parseInt(localStorage.getItem('rechargeSpeedLevel')) || 0;
+        let tapBotPurchased = localStorage.getItem('tapBotPurchased') === 'true';
 
         document.getElementById('balance').innerText = balance.toLocaleString();
         document.getElementById('balanceBoost').innerText = balance.toLocaleString();
@@ -53,6 +69,8 @@
         document.getElementById('maxEnergy').innerText = maxEnergy;
         document.getElementById('multitapLevel').innerText = multitapLevel;
         document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
+        document.getElementById('rechargeSpeedLevel').innerText = rechargeSpeedLevel;
+        document.getElementById('tapBot').innerText = tapBotPurchased ? 'Purchased' : 'Not Purchased';
 
         function showPage(pageId) {
             document.getElementById('clickPage').classList.add('hidden');
@@ -67,7 +85,7 @@
 
         function tap() {
             if (energy > 0) {
-                balance += 1 * (1 + multitapLevel * 0.1);
+                balance += 1 * (1 + multitapLevel * 0.2);
                 energy -= 1;
                 updateDisplay();
                 saveData();
@@ -75,16 +93,29 @@
         }
 
         function upgrade(type) {
-            if (type === 'multitap' && balance >= 500000) {
-                balance -= 500000;
+            if (type === 'multitap' && balance >= 50000) {
+                balance -= 50000;
                 multitapLevel += 1;
                 document.getElementById('multitapLevel').innerText = multitapLevel;
-            } else if (type === 'energyLimit' && balance >= 400000) {
-                balance -= 400000;
+            } else if (type === 'energyLimit' && balance >= 40000) {
+                balance -= 40000;
                 energyLimitLevel += 1;
-                maxEnergy += 500;
+                maxEnergy += 50;
                 document.getElementById('energyLimitLevel').innerText = energyLimitLevel;
                 document.getElementById('maxEnergy').innerText = maxEnergy;
+            } else if (type === 'rechargeSpeed' && balance >= 30000) {
+                balance -= 30000;
+                rechargeSpeedLevel += 1;
+                document.getElementById('rechargeSpeedLevel').innerText = rechargeSpeedLevel;
+            } else if (type === 'tapBot' && balance >= 200000 && !tapBotPurchased) {
+                balance -= 200000;
+                tapBotPurchased = true;
+                document.getElementById('tapBot').innerText = 'Purchased';
+                setInterval(() => {
+                    if (tapBotPurchased && energy > 0) {
+                        tap();
+                    }
+                }, 1000);
             }
             updateDisplay();
             saveData();
@@ -102,11 +133,13 @@
             localStorage.setItem('maxEnergy', maxEnergy);
             localStorage.setItem('multitapLevel', multitapLevel);
             localStorage.setItem('energyLimitLevel', energyLimitLevel);
+            localStorage.setItem('rechargeSpeedLevel', rechargeSpeedLevel);
+            localStorage.setItem('tapBotPurchased', tapBotPurchased);
         }
 
         setInterval(() => {
             if (energy < maxEnergy) {
-                energy += 1;
+                energy += 1 + rechargeSpeedLevel;
                 updateDisplay();
                 saveData();
             }
